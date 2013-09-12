@@ -25,18 +25,27 @@ class SiriProxy
       begin
         listen_addr = $APP_CONFIG.listen || "0.0.0.0"
         puts "[Info - Server] Starting SiriProxy on #{listen_addr}:#{$APP_CONFIG.port}..."
+        #Initialize the plugins and store the manager so they don't reload constantly
+        manager = SiriProxy::PluginManager.new()
+        manager.plugins.each_with_index do |plugin, i|
+      		if plugin.respond_to?('plugin_init')                                                                     
+        		$APP_CONFIG.plugins[i]['init'] = plugin.plugin_init
+      		end
+    	end
         EventMachine::start_server(listen_addr, $APP_CONFIG.port, SiriProxy::Connection::Iphone, $APP_CONFIG.upstream_dns) { |conn|
           puts "[Info - Guzzoni] Starting conneciton #{conn.inspect}" if $LOG_LEVEL < 1
-          conn.plugin_manager = SiriProxy::PluginManager.new()
+          conn.plugin_manager = manager
           conn.plugin_manager.iphone_conn = conn
         }
-      
+        
         retries = 0
+=begin
         while $APP_CONFIG.server_ip && !$SP_DNS_STARTED && retries <= 5
           puts "[Info - Server] DNS server is not running yet, waiting #{2**retries} second#{'s' if retries > 1}..."
           sleep 2**retries
           retries += 1
         end
+=end
 
         if retries > 5
           puts "[Error - Server] DNS server did not start up."

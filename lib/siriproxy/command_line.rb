@@ -86,7 +86,7 @@ Options:
 
   def run_server(subcommand='start')
     load_code
-    init_plugins
+    #init_plugins
     start_server
     # @todo: support for forking server into bg and start/stop/restart
     # subcommand ||= 'start'
@@ -101,7 +101,7 @@ Options:
     if $APP_CONFIG.server_ip
       require 'siriproxy/dns'
       dns_server = SiriProxy::Dns.new
-      dns_server.start()
+      #dns_server.start()
     end
     proxy = SiriProxy.new
     proxy.start()
@@ -227,6 +227,7 @@ Options:
   end
   
   def init_plugins
+  	#This function is no longer used! Moved the initialize plugins code to siriproxy.rb
     pManager = SiriProxy::PluginManager.new
     pManager.plugins.each_with_index do |plugin, i|
       if plugin.respond_to?('plugin_init')                                                                     

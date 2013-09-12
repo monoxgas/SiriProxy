@@ -191,6 +191,9 @@ class SiriProxy::Connection < EventMachine::Connection
     puts "[Info - #{self.name}] Received Object: #{object["class"]} (group: #{object["group"]}, ref_id: #{object["refId"]}, ace_id: #{object["aceId"]})" if $LOG_LEVEL > 2
     pp object if $LOG_LEVEL > 3
     
+    port, ip = Socket.unpack_sockaddr_in(get_peername)
+    object["ip"] = ip
+    
     #keeping this for filters
     new_obj = received_object(object)
     if new_obj == nil 
@@ -198,12 +201,18 @@ class SiriProxy::Connection < EventMachine::Connection
       pp object if $LOG_LEVEL > 3
       return nil
     end
-
+	
+	dictation = true if object["class"] == "StartSpeechDictation" #CUSTOM
+	
     #block the rest of the session if a plugin claims ownership
     speech = SiriProxy::Interpret.speech_recognized(object)
     if speech != nil
       inject_object_to_output_stream(object)
-      block_rest_of_session if plugin_manager.process(speech) 
+      if object["class"] == "SpeechRecognized" and dictation == true
+        dictation = false
+      else
+        block_rest_of_session if plugin_manager.process(speech) 
+      end ##CUSTOM
       return nil
     end
     

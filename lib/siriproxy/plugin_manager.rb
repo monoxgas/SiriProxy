@@ -5,6 +5,7 @@ class SiriProxy::PluginManager < Cora
   attr_accessor :plugins, :iphone_conn, :guzzoni_conn
 
   def initialize()
+  	puts "CALLED AGAIN!"
     load_plugins()
   end
 

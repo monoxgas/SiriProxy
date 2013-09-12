@@ -20,8 +20,10 @@ class SiriProxy::Dns
   end
 
   def start(log_level=Logger::WARN)
+    @thread = nil
     @thread = Thread.new {
       begin
+      	puts "0"
         self.run(log_level)
         $SP_DNS_STARTED = true
       rescue RuntimeError => e
@@ -48,21 +50,22 @@ class SiriProxy::Dns
   def run(log_level=Logger::WARN,server_ip=$APP_CONFIG.server_ip)
     if server_ip
       upstream = @upstream
-        
+      puts "1"
       # Start the RubyDNS server
       RubyDNS::run_server(:listen => @interfaces) do
         @logger.level = log_level
-
+		puts"2"
         match(/guzzoni.apple.com/, Resolv::DNS::Resource::IN::A) do |transaction|
           transaction.respond!(server_ip)
         end
-
+		puts "3"
         # Default DNS handler
         otherwise do |transaction|
           transaction.passthrough!(upstream)
         end
+        puts "4"
       end
-
+      puts "5"
       puts "[Info - Server] DNS Server started, tainting 'guzzoni.apple.com' with #{server_ip}"
     end
   end

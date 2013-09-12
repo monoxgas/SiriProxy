@@ -284,12 +284,22 @@ class SiriRequestCompleted < SiriObject
 end
 add_property_to_class(SiriRequestCompleted, :callbacks)
 
+class SiriResultCallback < SiriObject
+    def initialize(commands=[], code = 0)
+        super("ResultCallback", "com.apple.ace.system")
+        self.commands = commands
+        self.code = code
+    end
+end
+add_property_to_class(SiriResultCallback, :commands)
+add_property_to_class(SiriResultCallback, :code)
+
 #####
 # iPhone Responses (misc meta data back to the server)
 #####
 
 class SiriStartRequest < SiriObject
-  def initialize(utterance="Testing", handsFree=false, proxyOnly=false)
+  def initialize(utterance="Testing", handsFree=false, proxyOnly=false, command="")
     super("StartRequest", "com.apple.ace.system")
     self.utterance = utterance
     self.handsFree = handsFree
